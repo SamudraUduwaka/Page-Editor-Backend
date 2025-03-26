@@ -1,4 +1,5 @@
 ### Sample Input to the JinjavaParser (LayoutParser)
+```
 <div>
   {% for user in users %}
     <p>{{ user.name }}</p>
@@ -10,9 +11,11 @@
     {% endif %}
   {% endfor %}
 </div>
+```
 
 
 ### Sample output from the LayoutParser --> String Output
+```
 <div>
     <p>Alice</p>
     <p>Bob</p>
@@ -20,8 +23,10 @@
         {{{MainSection}}}
       <p>No Bob</p>
 </div>
+```
 
 ### Sample output from the ComponentEngine
+```
 <div>
     <p>Alice</p>
     <p>Bob</p>
@@ -29,3 +34,4 @@
         <div>The content of Main Section</div>
       <p>No Bob</p>
 </div>
+```
