@@ -15,15 +15,26 @@ public class App {
         data.put("users", usersList);
 
         // File path of the Jinja template
-        String filePath = "https://cd.statically.io/gh/SamudraUduwaka/testFilesForCustomPageEditor/24012874b876ae3535ef0ca46e1e0e1c3dbfc37b/test.html.j2";
+        String filePath = "https://cdn.statically.io/gh/SamudraUduwaka/testFilesForCustomPageEditor/e68ed32674fdac72968a3de40df643b48c8c33cf/test.html.j2";
         // Default file path of the Default template WSO2 provides
         String filePathDefault = "templates/template.html.j2";
 
-        // Parse Jinja templates 
+        // Parse Jinja templates
         try {
             String parsedTemplate = LayoutParser.parse(data, filePath, filePathDefault);
             System.out.println(parsedTemplate);
+
+            try {
+
+                String result = ComponentEngine.resolveComponents(parsedTemplate);
+                System.out.println("Final Rendered Page:\n" + result);
+            } catch (Exception e) {
+
+                e.printStackTrace();
+            }
+
         } catch (ConfigParserException e) {
+            
             e.printStackTrace();
         }
 

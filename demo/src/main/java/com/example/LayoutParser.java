@@ -18,7 +18,8 @@ public class LayoutParser {
 
     private static final Log log = LogFactory.getLog(LayoutParser.class);
 
-    public static String parse(Map<String, Object> data, String templateFilePath, String templateFilePathDefault) throws ConfigParserException {
+    public static String parse(Map<String, Object> data, String templateFilePath, String templateFilePathDefault)
+            throws ConfigParserException {
 
         JinjavaConfig configurator = JinjavaConfig.newBuilder()
                 .withLstripBlocks(true)
@@ -31,19 +32,19 @@ public class LayoutParser {
         try {
             // 1. Try loading from CDN / URL first
             try (InputStream input = new URL(templateFilePath).openStream();
-                 Scanner scanner = new Scanner(input, "UTF-8")) {
-        
+                    Scanner scanner = new Scanner(input, "UTF-8")) {
+
                 log.info("Loading template from URL: " + templateFilePath);
                 templateContent = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
-        
+
             } catch (Exception urlEx) {
                 log.warn("Failed to load template from Your Edited Content --> Switching to default template");
-        
-                // 2. Try loading the default template file 
+
+                // 2. Try loading the default template file
                 if (Files.exists(Paths.get(templateFilePathDefault))) {
                     log.info("Loading template from local file path: " + templateFilePathDefault);
                     templateContent = new String(Files.readAllBytes(Paths.get(templateFilePathDefault)));
-        
+
                 } else {
                     // 3. Fallback to classpath resource
                     InputStream resourceStream = LayoutParser.class.getClassLoader()
@@ -56,14 +57,28 @@ public class LayoutParser {
                     }
                 }
             }
-        
+
         } catch (Exception e) {
-            throw new ConfigParserException("Failed to load template from any source: " +  e);
+            throw new ConfigParserException("Failed to load template from any source: " + e);
         }
-        
+
+        StringBuilder processedTemplate = new StringBuilder();
+        try (Scanner lineScanner = new Scanner(templateContent)) {
+            while (lineScanner.hasNextLine()) {
+                String line = lineScanner.nextLine();
+                if (line.contains("{{{")) {
+                    processedTemplate.append("{% raw %}\n")
+                            .append(line).append("\n")
+                            .append("{% endraw %}\n");
+                } else {
+                    processedTemplate.append(line).append("\n");
+                }
+            }
+        }
+
         // 3. Render the template
         try {
-            return jinjava.render(templateContent, data);
+            return jinjava.render(processedTemplate.toString(), data);
         } catch (Exception e) {
             log.error("Error while parsing Jinja template", e);
             throw new ConfigParserException("Template rendering failed", e);
